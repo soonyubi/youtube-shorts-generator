@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { OpenAIMessage } from './interfaces/openai.chat.interface';
+import { ConfigService } from '@nestjs/config';
 
 export type CHAT_MODEL = 'gpt-3.5-turbo' | 'gpt-4';
 
@@ -9,9 +10,9 @@ export class OpenAIService {
   private readonly openAI: OpenAI;
   private DEFAULT_CHAT_TEMPERATURE: number = 1;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.openAI = new OpenAI({
-      // apiKey: 'some-api key',
+      apiKey: this.configService.get<string>('OPENAI_KEY'),
     });
   }
 

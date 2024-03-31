@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { XMLParser } from 'fast-xml-parser';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import OpenAI from 'openai';
+import { ConfigService } from '@nestjs/config';
 
 interface NewsItem {
   title: string;
@@ -24,9 +25,12 @@ interface NewsItem {
 export class GoogleTrendCrawlerService {
   private readonly openAI: OpenAI;
 
-  constructor(private readonly httpService: HttpService) {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
     this.openAI = new OpenAI({
-      // apiKey: 'some-api key',
+      apiKey: this.configService.get<string>('OPENAI_KEY'),
     });
   }
 
