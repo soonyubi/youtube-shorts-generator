@@ -6,12 +6,16 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import { TextToSpeechClient, protos } from '@google-cloud/text-to-speech';
 import * as util from 'util';
 import { ConfigService } from '@nestjs/config';
+import { YoutubeService } from '../providers/youtube/youtube.provider';
 
 registerFont('./font/HiMelody-Regular.ttf', { family: 'HiMelody' });
 
 @Injectable()
 export class ShortGeneratorService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly youtubeAPIService: YoutubeService,
+  ) {}
 
   async renderTextOnTemplate() {
     const templatePath = './shorts-template/shorts_template.png';
@@ -103,7 +107,7 @@ export class ShortGeneratorService {
     const inputAudioPath = './output/output.mp3';
     const outputVideoPath = './output/output.mp4';
 
-    ffmpeg(inputVideoPath)
+    await ffmpeg(inputVideoPath)
       .addInput(inputAudioPath)
       .videoCodec('copy')
       .audioCodec('copy')
@@ -114,6 +118,10 @@ export class ShortGeneratorService {
       .on('end', function () {
         console.log('Processing finished !');
       });
+  }
+
+  public async afterCreateShorts() {
+    await this.youtubeAPIService.uploadVideo();
   }
 
   private splitTextUnder25Letters(text: string, maxLineLength: number): string[] {
