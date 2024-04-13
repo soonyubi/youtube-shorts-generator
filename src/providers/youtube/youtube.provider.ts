@@ -9,15 +9,15 @@ export class YoutubeService implements OnModuleInit {
   private oauth2Client: OAuth2Client;
   private youtube;
 
-  constructor(private readonly configService: ConfigService) {}
-
-  async onModuleInit() {
+  constructor(private readonly configService: ConfigService) {
     const CLIENT_ID = this.configService.get<string>('GOOGLE_CLIENT_ID');
     const CLIENT_SECRET = this.configService.get<string>('GOOGLE_CLIENT_SECRET');
     const REDIRECT_URI = this.configService.get<string>('GOOGLE_REDIRECT_URI');
-
     this.oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+    this.youtube = google.youtube('v3');
+  }
 
+  async onModuleInit() {
     // Set the global options; any API call after this will use these settings.
     google.options({ auth: this.oauth2Client });
 

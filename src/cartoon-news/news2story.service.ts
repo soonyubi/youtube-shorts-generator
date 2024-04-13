@@ -35,16 +35,15 @@ export class CartoonNewsGenerator {
     return newsArticle;
   }
 
-  async story2Image(newsArticleSummary: NewsArticleSummary) {
-    const images = await Promise.all(
-      newsArticleSummary.scenes.map((scene) => {
-        return this.openAIService.createImage(JSON.stringify(scene));
-      }),
+  async story2Image(newsArticleSummary: NewsArticleSummary | null) {
+    const images = await this.openAIService.createImage(
+      `A child bride and groom, representing young Gandhi and his wife`,
+    );
+    const images2 = await this.openAIService.createImage(
+      `An illustration of a teenage boy having a coming-of-age talk`,
     );
 
-    console.log(newsArticleSummary);
-    for (const image of images) {
-      console.log(image);
-    }
+    console.log(images);
+    console.log(images2);
   }
 }

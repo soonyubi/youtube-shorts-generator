@@ -6,6 +6,7 @@ import { CartoonNews } from './cartoon-news/news2story.module';
 import { OpenAIModule } from './providers/openai/openai.module';
 import { ShortGeneratorModule } from './short-generator/short-generator.module';
 import { YoutubeAPIModule } from './providers/youtube/youtube.module';
+import { Img2vidModule } from './img2vid/img2vid.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { YoutubeAPIModule } from './providers/youtube/youtube.module';
     CartoonNews,
     ShortGeneratorModule,
     YoutubeAPIModule,
+    Img2vidModule,
   ],
   controllers: [AppController],
   providers: [AppService],
