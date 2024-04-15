@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError } from 'axios';
 import * as FormData from 'form-data';
@@ -11,6 +11,9 @@ import {
   ShortsVideoContentIdentifiers,
 } from '../shared/interfaces/shared.interface';
 import { generateImagePath, generateVideoPath } from '../util/media-path-utils';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { VIDEO_CREATE_CHANNEL, VIDEO_PROCESSING_QUEUE } from '../shared/constant/queue.constant';
 
 @Injectable()
 export class Img2vidService {
@@ -24,11 +27,12 @@ export class Img2vidService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly awsService: AwsService,
+    @InjectQueue(VIDEO_PROCESSING_QUEUE) private videoQueue: Queue,
   ) {
     this.STABILITY_AI_API_KEY = this.configService.get<string>('STABILITY_AI_API_KEY')!;
   }
 
-  async createVideoFromImage(identifier: ShortsImageContentIdentifiers): Promise<string> {
+  async createVideoFromImage(identifier: ShortsImageContentIdentifiers) {
     const data = new FormData();
     data.append(
       'image',
@@ -52,11 +56,19 @@ export class Img2vidService {
       data: data,
     });
 
-    return response.data.id;
+    this.addVideoCreateMessage({
+      ...identifier,
+      extension: 'mp4',
+      videoId: response.data.id,
+    });
+  }
+
+  private addVideoCreateMessage(data: ShortsVideoContentIdentifiers) {
+    this.videoQueue.add(VIDEO_CREATE_CHANNEL, data, { delay: 10000 });
   }
 
   async saveVideoToS3(identifier: ShortsVideoContentIdentifiers) {
-    const { data } = await firstValueFrom(
+    const response = await firstValueFrom(
       this.httpService
         .get(`${this.stabilityUrl}/result/${identifier.videoId}`, {
           headers: {
@@ -74,17 +86,15 @@ export class Img2vidService {
         ),
     );
 
+    if (response.status === HttpStatus.ACCEPTED) {
+      this.addVideoCreateMessage(identifier);
+      return;
+    }
+
     await this.awsService.uploadVideoByBuffer(
       'youtube-shorts-generator',
       generateVideoPath(identifier.userId, identifier.postId, identifier.videoId, identifier.extension),
-      Buffer.from(data),
+      Buffer.from(response.data),
     );
-    // await this.awsService.getVideo(
-    //   'youtube-shorts-generator',
-    //   generateVideoPath(identifier.userId, identifier.postId, identifier.videoId, identifier.extension),
-    // );
-    this.afterSaveVideoToS3();
   }
-
-  private afterSaveVideoToS3() {}
 }

@@ -8,6 +8,8 @@ import { OpenAIModule } from './providers/openai/openai.module';
 import { YoutubeAPIModule } from './providers/youtube/youtube.module';
 import { ShortGeneratorModule } from './short-generator/short-generator.module';
 import { AwsModule } from './providers/aws/aws.module';
+import { BullModule } from '@nestjs/bull';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -19,6 +21,16 @@ import { AwsModule } from './providers/aws/aws.module';
     YoutubeAPIModule,
     Img2vidModule,
     AwsModule,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST') ?? 'localhost',
+          port: 6379,
+        },
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
