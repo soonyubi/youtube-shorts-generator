@@ -9,7 +9,7 @@ import { AwsService } from '../providers/aws/aws.service';
 import {
   ShortsImageContentIdentifiers,
   ShortsVideoContentIdentifiers,
-} from '../shared/interfaces/shared.interface';
+} from '../shared/interfaces/short-identifier.interface';
 import { generateImagePath, generateVideoPath } from '../util/media-path-utils';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';

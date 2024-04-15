@@ -1,7 +1,7 @@
 import { Process, Processor } from '@nestjs/bull';
 import { VIDEO_CREATE_CHANNEL, VIDEO_PROCESSING_QUEUE } from '../shared/constant/queue.constant';
 import { Job } from 'bull';
-import { ShortsVideoContentIdentifiers } from '../shared/interfaces/shared.interface';
+import { ShortsVideoContentIdentifiers } from '../shared/interfaces/short-identifier.interface';
 import { Img2vidService } from './img2vid.service';
 import { Logger } from '@nestjs/common';
 

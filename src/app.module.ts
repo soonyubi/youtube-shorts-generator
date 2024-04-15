@@ -10,6 +10,7 @@ import { ShortGeneratorModule } from './short-generator/short-generator.module';
 import { AwsModule } from './providers/aws/aws.module';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PromptGeneratorModule } from './prompt-generator/prompt-generator.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    PromptGeneratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
